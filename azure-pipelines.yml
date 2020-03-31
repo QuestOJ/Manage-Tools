@@ -13,7 +13,6 @@ pr: none
 
 jobs:
 - job: build
-  dependsOn: linux
   timeoutInMinutes: 60
 
   pool:
