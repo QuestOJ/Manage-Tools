@@ -3,7 +3,7 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-BINARY_NAME=codeforces
+BINARY_NAME=manage-tools
 BINARY_UNIX=$(BINARY_NAME)_unix
 BUILD_ENV = env
 
