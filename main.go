@@ -13,10 +13,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/shirou/gopsutil/process"
@@ -58,6 +60,7 @@ type BasicInfo struct {
 type JobCommand struct {
 	Program string   `json:"program"`
 	Args    []string `json:"args"`
+	User    string   `json:"user"`
 }
 
 //JobSettings describes options for a job
@@ -400,6 +403,19 @@ func outputStream(outputStream io.ReadCloser, outputType string, runDir string, 
 	}(str)
 }
 
+func getRunUser(username string) (uint32, uint32, error) {
+	user, err := user.Lookup(username)
+
+	if err != nil {
+		return 0, 0, err
+	}
+
+	uid, _ := strconv.Atoi(user.Uid)
+	gid, _ := strconv.Atoi(user.Gid)
+
+	return uint32(uid), uint32(gid), nil
+}
+
 func runProgram(command JobCommand, timeout int, runDir string, id int, attempt int) (bool, error) {
 	var scriptsCommand strings.Builder
 
@@ -418,7 +434,15 @@ func runProgram(command JobCommand, timeout int, runDir string, id int, attempt 
 		return false, err
 	}
 
+	uid, gid, err := getRunUser(command.User)
+
+	if err != nil {
+		return false, err
+	}
+
 	subProcess := exec.Command("bash", runDir+"/scripts.sh")
+	subProcess.SysProcAttr = &syscall.SysProcAttr{}
+	subProcess.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 
 	stdout, err := subProcess.StdoutPipe()
 	if err != nil {
@@ -591,7 +615,7 @@ func Init(dataDir string, taskName string) {
 }
 
 func version() {
-	fmt.Println("Manage tools version: 3.0.0")
+	fmt.Println("Manage tools version: 3.1.0")
 }
 
 func main() {
