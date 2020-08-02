@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const VERSION = "Manage tools version 3.2"
+const VERSION = "Manage tools version 3.3 (unstable)"
 
 var worker bool
 var dataDir string

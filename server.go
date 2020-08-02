@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/md5"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -110,7 +109,7 @@ func submit(writer http.ResponseWriter, request *http.Request) {
 
 	if id != config.ClientID && token != string(storePassword[:]) {
 		writer.WriteHeader(403)
-		log(3, "403 Authentication password required")
+		log(3, "403 Authentication failed")
 		return
 	}
 
@@ -124,8 +123,6 @@ func submit(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	fmt.Println(exectask)
-
 	if validateTaskname(exectask.TaskName) == false {
 		writer.WriteHeader(400)
 		writer.Write([]byte("Invailed task name " + exectask.TaskName))
@@ -137,5 +134,4 @@ func submit(writer http.ResponseWriter, request *http.Request) {
 
 	go runWorker(generateID)
 	writer.Write([]byte(generateID))
-
 }
